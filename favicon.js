@@ -25,9 +25,7 @@ var getFavicon = function(domain, callback) {
 	 * If page was redirected, add redirect URL to a list of allowed requests
 	 */
 	page.onResourceReceived = function(response) {
-		if (response.redirectURL) {
-			console.log('redirected from ' + response.url + ' to ' + response.redirectURL);
-		} else {
+		if (!response.redirectURL) {
 			stop_requests = true;
 		}
 	};

@@ -20,17 +20,15 @@ var getFavicon = function(domain, callback) {
 	// disabling output of errors on the page
 	page.onError = function(msg, trace) {};
 
-	var acceptable_urls = [ url ];
+	var stop_requests = false;
 	/*
 	 * If page was redirected, add redirect URL to a list of allowed requests
 	 */
 	page.onResourceReceived = function(response) {
-		for (var i=0; i < acceptable_urls.length; i++)
-		{
-			if (response.url == acceptable_urls[i] && response.redirectURL) {
-				acceptable_urls.push(response.redirectURL);
-				break;
-			}
+		if (response.redirectURL) {
+			console.log('redirected from ' + response.url + ' to ' + response.redirectURL);
+		} else {
+			stop_requests = true;
 		}
 	};
 
@@ -38,16 +36,7 @@ var getFavicon = function(domain, callback) {
 	 * If it's not an original URL or a page it was redirected to, don't make a request
 	 */
 	page.onResourceRequested = function(requestData, request) {
-		var url_is_ok = false;
-		for (var i=0; i < acceptable_urls.length; i++)
-		{
-			if (requestData['url'] == acceptable_urls[i]) {
-				url_is_ok = true;
-				break;
-			}
-		}
-
-		if (!url_is_ok) {
+		if (stop_requests) {
 			request.abort();
 		}
 	};

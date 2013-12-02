@@ -41,7 +41,8 @@ var getFavicon = function(domain, callback) {
 
 	page.open(url, function(status) {
 		if (status !== 'success') {
-			return false;
+			callback();
+			return;
 		}
 
 		page.injectJs(jquery);
@@ -67,28 +68,28 @@ var getFavicon = function(domain, callback) {
 		});
 
 		if (!favicon) {
-			callback(domain, url + 'favicon.ico');
-		} else {
-			callback(domain, favicon);
+			favicon = url + 'favicon.ico';
 		}
+
+		callback(domain, favicon);
 	});
 };
 
-var i=1;
+var i=0;
 
-var chainCaller = function(domain, favicon) {
+var chainCaller = function(res_domain, res_favicon) {
 	// if we're invoked as callback, print the result
-	if (domain && favicon) {
-		console.log(domain + '\t' + favicon);
+	if (res_domain && res_favicon) {
+		console.log(res_domain + '\t' + res_favicon);
 	}
+
+	i++;
 
 	if (i < args.length) {
 		getFavicon(args[i], chainCaller);
 	} else {
 		phantom.exit();
 	}
-
-	i++;
 }
 
 // starting the chain

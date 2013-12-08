@@ -63,7 +63,9 @@ var getFavicon = function(domain, callback) {
 						var sizes = sizes_string.split(' ');
 					}
 
-					if (!sizes_string || $.grep(sizes, function(size) { return size == '16x16'; }).length > 0) {
+					if (!sizes_string || $.grep(sizes, function(size) {
+						return size == '16x16' || size == '16X16';
+					}).length > 0) {
 						// resolving relative URL
 						var a = document.createElement('a');
 						a.href = href;

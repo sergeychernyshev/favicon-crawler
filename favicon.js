@@ -11,6 +11,8 @@ if (args.length < 2) {
 // local jQuery to inject on the page
 var jquery = 'jquery-1.10.2.min.js';
 
+var ph_console = console;
+
 var getFavicon = function(domain, callback) {
 	var url = 'http://www.' + domain + '/';
 
@@ -47,40 +49,48 @@ var getFavicon = function(domain, callback) {
 
 		page.injectJs(jquery);
 
-		var favicon = page.evaluate(function() {
-			var href = false;
+		var favicons = page.evaluate(function() {
+			var hrefs = [];
 
 			$('link').each(function() {
 				var rel = $(this).attr('rel');
 				if (rel == 'icon' || rel == 'shortcut icon') {
-					href = $(this).attr('href');
+					var href = $(this).attr('href');
 
-					// resolving relative URL
-					var a = document.createElement('a');
-					a.href = href;
-					href = a.href;
+					var sizes_string = $(this).attr('sizes');
 
-					return;
+					if (sizes_string) {
+						var sizes = sizes_string.split(' ');
+					}
+
+					if (!sizes_string || $.grep(sizes, function(size) { return size == '16x16'; }).length > 0) {
+						// resolving relative URL
+						var a = document.createElement('a');
+						a.href = href;
+						href = a.href;
+
+						hrefs.push(href);
+					}
 				}
 			});
 
-			return href;
+			return hrefs;
 		});
 
-		if (!favicon) {
-			favicon = url + 'favicon.ico';
+		if (favicons.length == 0) {
+			favicons = [url + 'favicon.ico'];
 		}
 
-		callback(domain, favicon);
+		callback(domain, favicons);
 	});
 };
 
 var i=0;
 
-var chainCaller = function(res_domain, res_favicon) {
+var chainCaller = function(res_domain, res_favicons) {
 	// if we're invoked as callback, print the result
-	if (res_domain && res_favicon) {
-		console.log(res_domain + '\t' + res_favicon);
+	if (res_domain && res_favicons.length > 0) {
+		console.log(res_domain + '\t' + res_favicons.join(' '));
 	}
 
 	i++;

@@ -1,6 +1,15 @@
 /**
- * This script accepts domain name as only parameter and returns a URL for favicon.ico file to be retrieved.
- * It does not check if file is actually available.
+ * This script accepts a list of domains as parameters and outputs
+ * one domain per line with space-separated list of URLs for all possible
+ * 16x16 favicon.ico files based on the spec for specifying icon URLs using
+ * <link> tags: http://www.w3.org/html/wg/drafts/html/master/links.html#rel-icon
+ *
+ * It falls back to /favicon.ico when no <link> tags found in the document
+ *
+ * As part of detection it follows a sequence of redirects,
+ * e.g. example.com -> www.example.com until page stops redirecting
+ *
+ * It does not check if files are actually available.
  */
 var args = require("system").args;
 

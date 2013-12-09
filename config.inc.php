@@ -24,7 +24,7 @@ define('FAVICONS_QUEUE_URL_CACHE', TEMP_FOLDER . '/faviconsQueueURLCache');
 
 // time during which we expect the result to be produced for each chunk
 define('DOMAINS_IN_CHUNK', 100);
-define('DOMAINS_PER_PHANTOM_RUN', DOMAINS_IN_CHUNK);
+define('DOMAINS_PER_PHANTOM_RUN', intval(DOMAINS_IN_CHUNK / 5));
 define('DEFAULT_VISIBILITY_TIMEOUT', DOMAINS_IN_CHUNK * 3);
 
 # Download and install PhantomJS: http://phantomjs.org/download.html

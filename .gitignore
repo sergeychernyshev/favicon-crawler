@@ -3,3 +3,4 @@ composer.phar
 system.ini
 node_modules
 top-1m.csv
+vendor/

@@ -65,7 +65,8 @@ while (1) {
 
 		$job_output = '';
 		while($domains = array_splice($domains_array, 0, DOMAINS_PER_PHANTOM_RUN)) {
-			$exec_string = PHANTOMJS . " favicon.js " . implode(' ', $domains) . " 2>/dev/null";
+			$exec_string = PHANTOMJS . " " . dirname(__FILE__).  "/favicon.js " .
+					implode(' ', $domains) . " 2>/dev/null";
 
 			if (DEBUG) {
 				echo("Executing: $exec_string\n");

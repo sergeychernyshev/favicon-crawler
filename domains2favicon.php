@@ -15,7 +15,11 @@ $client = SqsClient::factory(array(
 if (file_exists(DOMAINS_QUEUE_URL_CACHE)) {
 	$domainsQueueUrl = file_get_contents(DOMAINS_QUEUE_URL_CACHE);
 } else {
-	$result = $client->createQueue(array('QueueName' => DOMAINS_QUEUE_NAME));
+	$result = $client->createQueue(array(
+		'QueueName' => DOMAINS_QUEUE_NAME,
+		'Attributes' => array(
+			QueueAttribute::VISIBILITY_TIMEOUT => DEFAULT_VISIBILITY_TIMEOUT * Time::SECONDS)
+	));
 	$domainsQueueUrl = $result->get('QueueUrl');
 }
 

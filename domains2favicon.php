@@ -41,30 +41,54 @@ while (1) {
 		'QueueUrl' => $domainsQueueUrl,
 	));
 
-	foreach ($result->getPath('Messages/*/Body') as $domain_list) {
-		$domains = explode("\n", $domain_list);
+	$messages = $result->get('Messages');
+	//var_export(count($messages)); exit;
 
-		$exec_string = "timeout 90 " . PHANTOMJS . " favicon.js " .
-				implode(' ', $domains) . "  2>/dev/null";
+	if (!$messages || !is_array($messages) || count($messages) == 0) {
+		// Done with everything in SQS, wait before exiting
+		echo "\n[" . date('r') . "] No messages returned. Sleeping for " . WAIT_BETWEEN_RUNS . " seconds before exiting";
+		sleep(WAIT_BETWEEN_RUNS);
+		exit(4); // completed
+	}
 
-		if (DEBUG) {
-			echo("Executing: $exec_string\n");
-		}
+	foreach ($messages as $message) {
+		$domain_list = $message['Body'];
+		$handle = $message['ReceiptHandle'];
 
-		$output = shell_exec($exec_string);
+		$domains_array = explode("\n", $domain_list);
 
-		if (DEBUG) {
-			echo("Output: [$output]\n");
+		$job_output = '';
+		while($domains = array_splice($domains_array, 0, 5)) {
+			$exec_string = "timeout 90 " . PHANTOMJS . " favicon.js " .
+					implode(' ', $domains) . "  2>/dev/null";
+
+			if (DEBUG) {
+				echo("Executing: $exec_string\n");
+			}
+
+			$output = shell_exec($exec_string);
+
+			if (DEBUG) {
+				echo("Output: [$output]\n");
+			}
+			$job_output .= $output;
 		}
 
 		$client->sendMessage(array(
 			'QueueUrl'    => $faviconsQueueUrl,
-			'MessageBody' => $output
+			'MessageBody' => $job_output
 		));
+
+		$client->deleteMessage(array(
+			'QueueUrl'    => $domainsQueueUrl,
+			'MessageBody' => $handle
+		));
+
+		// testing one run
+		exit;
 	}
 }
 
-// Done with everything in SQS, wait before exiting
 echo "\n[" . date('r') . "] Sleeping for " . WAIT_BETWEEN_RUNS . " seconds before exiting";
 sleep(WAIT_BETWEEN_RUNS);
 exit(1); // completed

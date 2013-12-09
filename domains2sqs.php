@@ -4,6 +4,8 @@ require_once dirname(__FILE__) . '/config.inc.php';
 require_once dirname(__FILE__) . '/vendor/autoload.php';
 
 use Aws\Sqs\SqsClient;
+use Aws\Common\Enum\Time;
+use Aws\Sqs\Enum\QueueAttribute;
 
 $client = SqsClient::factory(array(
     'key'    => SQS_AWS_ACCESS_KEY_ID,
@@ -11,7 +13,11 @@ $client = SqsClient::factory(array(
     'region' => SQS_AWS_REGION
 ));
 
-$result = $client->createQueue(array('QueueName' => DOMAINS_QUEUE_NAME));
+$result = $client->createQueue(array(
+		'QueueName' => DOMAINS_QUEUE_NAME,
+		'Attributes' => array(
+			QueueAttribute::VISIBILITY_TIMEOUT => DEFAULT_VISIBILITY_TIMEOUT * Time::SECONDS)
+	));
 $domainsQueueUrl = $result->get('QueueUrl');
 
 if (is_null($domainsQueueUrl)) {

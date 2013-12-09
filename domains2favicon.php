@@ -4,6 +4,8 @@ require_once dirname(__FILE__) . '/config.inc.php';
 require_once dirname(__FILE__) . '/vendor/autoload.php';
 
 use Aws\Sqs\SqsClient;
+use Aws\Common\Enum\Time;
+use Aws\Sqs\Enum\QueueAttribute;
 
 $client = SqsClient::factory(array(
     'key'    => SQS_AWS_ACCESS_KEY_ID,
@@ -86,9 +88,6 @@ while (1) {
 			'QueueUrl'    => $domainsQueueUrl,
 			'ReceiptHandle' => $handle
 		));
-
-		// testing one run
-		exit;
 	}
 }
 

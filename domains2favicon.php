@@ -58,9 +58,8 @@ while (1) {
 		$domains_array = explode("\n", $domain_list);
 
 		$job_output = '';
-		while($domains = array_splice($domains_array, 0, 5)) {
-			$exec_string = "timeout 90 " . PHANTOMJS . " favicon.js " .
-					implode(' ', $domains) . "  2>/dev/null";
+		while($domains = array_splice($domains_array, 0, DOMAINS_PER_PHANTOM_RUN)) {
+			$exec_string = PHANTOMJS . " favicon.js " . implode(' ', $domains) . " 2>/dev/null";
 
 			if (DEBUG) {
 				echo("Executing: $exec_string\n");
@@ -81,7 +80,7 @@ while (1) {
 
 		$client->deleteMessage(array(
 			'QueueUrl'    => $domainsQueueUrl,
-			'MessageBody' => $handle
+			'ReceiptHandle' => $handle
 		));
 
 		// testing one run

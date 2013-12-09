@@ -4,12 +4,16 @@
  * 16x16 favicon.ico files based on the spec for specifying icon URLs using
  * <link> tags: http://www.w3.org/html/wg/drafts/html/master/links.html#rel-icon
  *
- * It falls back to /favicon.ico when no <link> tags found in the document
+ * It falls back to /favicon.ico when no <link> tags found in the document so
+ * all lists will have /favicon.ico appended to the end under final redirected
+ * base URL.
  *
  * As part of detection it follows a sequence of redirects,
  * e.g. example.com -> www.example.com until page stops redirecting
  *
  * It does not check if files are actually available.
+ *
+ * @todo Support for data URIs (see jokers.com)
  */
 var args = require("system").args;
 
@@ -58,14 +62,14 @@ var getFavicon = function(domain, callback) {
 
 		page.injectJs(jquery);
 
-		var favicons = page.evaluate(function() {
+		var favicons = [].concat(page.evaluate(function() {
 			var hrefs = [];
+			var a = document.createElement('a');
+			var href;
 
 			$('link').each(function() {
 				var rel = $(this).attr('rel');
 				if (rel == 'icon' || rel == 'shortcut icon') {
-					var href = $(this).attr('href');
-
 					var sizes_string = $(this).attr('sizes');
 
 					if (sizes_string) {
@@ -76,21 +80,27 @@ var getFavicon = function(domain, callback) {
 						return size == '16x16' || size == '16X16';
 					}).length > 0) {
 						// resolving relative URL
-						var a = document.createElement('a');
-						a.href = href;
+						a.href = $(this).attr('href');
 						href = a.href;
 
-						hrefs.push(href);
+						if (href.slice(0, 7) == 'http://' || href.slice(0, 8) == 'https://') {
+							hrefs.push(href);
+						}
 					}
 				}
 			});
 
-			return hrefs;
-		});
+			// appending /favicon.ico under final base domain
+			a.href = '/favicon.ico';
+			// resolving relative URL
+			href = a.href;
 
-		if (favicons.length == 0) {
-			favicons = [url + 'favicon.ico'];
-		}
+			if (href.slice(0, 7) == 'http://' || href.slice(0, 8) == 'https://') {
+				hrefs.push(href);
+			}
+
+			return hrefs;
+		}));
 
 		callback(domain, favicons);
 	});

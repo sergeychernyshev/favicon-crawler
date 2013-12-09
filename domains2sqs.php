@@ -11,34 +11,33 @@ $client = SqsClient::factory(array(
     'region' => SQS_AWS_REGION
 ));
 
-$result = $client->createQueue(array('QueueName' => $queueName));
-$queueUrl = $result->get('QueueUrl');
+$result = $client->createQueue(array('QueueName' => DOMAINS_QUEUE_NAME));
+$domainsQueueUrl = $result->get('QueueUrl');
 
-if (is_null($queueUrl)) {
-	die("Can't get queue URL for queue: $queueName\n");
+if (is_null($domainsQueueUrl)) {
+	die("Can't get queue URL for queue: " . DOMAINS_QUEUE_NAME . "\n");
 }
 
 $i = 0;
 $chunk = '';
 while($line = fgets(STDIN)) {
-	$line = preg_replace('/^.*,/', '', $line);
-	$chunk .= $line;
+	$chunk .= preg_replace('/^.*,/', '', $line);
 
 	$i++;
 	if ($i > DOMAINS_IN_CHUNK) {
 		$i = 0;
 
 		$client->sendMessage(array(
-			'QueueUrl'    => $queueUrl,
+			'QueueUrl'    => $domainsQueueUrl,
 			'MessageBody' => $chunk,
 		));
 		$chunk = '';
 	}
 }
 
-if ($chunk) {		
+if ($chunk) {
 	$client->sendMessage(array(
-		'QueueUrl'    => $queueUrl,
+		'QueueUrl'    => $domainsQueueUrl,
 		'MessageBody' => $chunk,
 	));
 }
